@@ -1,0 +1,30 @@
+name: Timestamp
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: "45 10 * * *"
+jobs:
+  auto_commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Modify timestamp file
+        run: |
+          d=`date '+%Y-%m-%dT%H:%M:%SZ'`
+          echo $d > .github/timestamp
+      - name: Commit changes
+        run: |
+          git config --local user.email "${{ secrets.USEREMAIL }}"
+          git config --local user.name "${{ secrets.USERNAME }}"
+          git commit -a -m "Timestamp"
+      - name: Push Back
+        uses: ad-m/github-push-action@master
+        with:
+          force: true
+          directory: "."
+          github_token: ${{ secrets.GITHUB_TOKEN }}
